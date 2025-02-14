@@ -9,6 +9,7 @@ const BLUM_TOKENS = process.env.BLUM_TOKENS ? process.env.BLUM_TOKENS.split(',')
 
 // Обработчики команд
 async function handleStart(msg) {
+  console.log('Handling /start command');
   const chatId = msg.chat.id;
   return bot.sendMessage(chatId,
     'Добро пожаловать в Earth Wallet Bot! 🌍\n\n' +
@@ -21,6 +22,7 @@ async function handleStart(msg) {
 }
 
 async function handlePrice(msg, match) {
+  console.log('Handling /price command');
   const chatId = msg.chat.id;
   const symbol = match[1]?.toUpperCase();
 
@@ -37,6 +39,7 @@ async function handlePrice(msg, match) {
 }
 
 async function handleTop(msg) {
+  console.log('Handling /top command');
   const chatId = msg.chat.id;
   const topCryptos = await getTopCryptos();
 
@@ -57,6 +60,7 @@ async function handleTop(msg) {
 }
 
 async function handleBlumTokens(msg) {
+  console.log('Handling /blumtokens command');
   const chatId = msg.chat.id;
   
   if (BLUM_TOKENS.length === 0) {
@@ -73,6 +77,7 @@ async function handleBlumTokens(msg) {
 }
 
 async function handleHelp(msg) {
+  console.log('Handling /help command');
   const chatId = msg.chat.id;
   return bot.sendMessage(chatId,
     '🤖 Помощь по командам:\n\n' +
@@ -86,15 +91,24 @@ async function handleHelp(msg) {
 // Обработчик вебхука
 module.exports = async (req, res) => {
   try {
+    console.log('Received webhook request:', {
+      method: req.method,
+      body: req.body,
+      headers: req.headers
+    });
+
     if (req.method === 'POST') {
-      const { message } = req.body;
-      
-      if (!message) {
+      const update = req.body;
+      console.log('Received update:', JSON.stringify(update, null, 2));
+
+      if (!update || !update.message) {
+        console.log('No message in update');
         return res.status(200).json({ message: 'No message in request' });
       }
 
+      const message = update.message;
       const text = message.text || '';
-      console.log('Received message:', text);
+      console.log('Processing message:', text);
 
       // Обработка команд
       if (text.startsWith('/start')) {
@@ -110,9 +124,11 @@ module.exports = async (req, res) => {
         await handleHelp(message);
       }
 
+      console.log('Message processed successfully');
       return res.status(200).json({ message: 'Success' });
     }
 
+    console.log('Not a POST request');
     return res.status(200).json({ message: 'Only POST requests are accepted' });
   } catch (error) {
     console.error('Error processing webhook:', error);

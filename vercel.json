@@ -4,6 +4,10 @@
     {
       "src": "api/**/*.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -14,6 +18,10 @@
     {
       "src": "/api/setwebhook",
       "dest": "/api/setwebhook.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
     }
   ]
 } 

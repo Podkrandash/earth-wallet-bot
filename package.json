@@ -1,0 +1,24 @@
+{
+  "name": "earth-wallet-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for crypto trading via Bybit",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.64.0",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.2",
+    "express": "^4.18.2",
+    "bybit-api": "^3.9.7",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 

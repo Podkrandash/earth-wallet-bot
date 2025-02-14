@@ -1,9 +1,9 @@
 const TelegramBot = require('node-telegram-bot-api');
 const { getPrice, getTopCryptos } = require('../src/services/bybit');
 
-// Инициализация бота
+// Создаем бота без вебхука для использования только API методов
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
-  webHook: true
+  polling: false // Отключаем polling, так как используем вебхуки
 });
 
 // Получаем список токенов Blum
@@ -123,50 +123,49 @@ async function handleHelp(msg) {
 // Обработчик вебхука
 module.exports = async (req, res) => {
   try {
-    console.log('Received webhook request:', {
-      method: req.method,
-      body: req.body,
-      headers: req.headers
-    });
-
-    if (req.method === 'POST') {
-      const update = req.body;
-      console.log('Received update:', JSON.stringify(update, null, 2));
-
-      if (!update || !update.message) {
-        console.log('No message in update');
-        return res.status(200).json({ message: 'No message in request' });
-      }
-
-      const message = update.message;
-      const text = message.text || '';
-      console.log('Processing message:', text);
-
-      try {
-        // Обработка команд
-        if (text.startsWith('/start')) {
-          await handleStart(message);
-        } else if (text.startsWith('/price')) {
-          const match = text.match(/\/price(?:\s+(.+))?/);
-          await handlePrice(message, match);
-        } else if (text.startsWith('/top')) {
-          await handleTop(message);
-        } else if (text.startsWith('/blumtokens')) {
-          await handleBlumTokens(message);
-        } else if (text.startsWith('/help')) {
-          await handleHelp(message);
-        }
-
-        console.log('Message processed successfully');
-        return res.status(200).json({ message: 'Success' });
-      } catch (error) {
-        console.error('Error processing command:', error);
-        return res.status(500).json({ error: 'Error processing command' });
-      }
+    if (req.method !== 'POST') {
+      return res.status(200).json({ message: 'Only POST requests are accepted' });
     }
 
-    console.log('Not a POST request');
-    return res.status(200).json({ message: 'Only POST requests are accepted' });
+    const update = req.body;
+    console.log('Received update:', JSON.stringify(update, null, 2));
+
+    if (!update || !update.message) {
+      console.log('No message in update');
+      return res.status(200).json({ message: 'No message in request' });
+    }
+
+    const message = update.message;
+    const text = message.text || '';
+    console.log('Processing message:', text);
+
+    // Отправляем предварительный ответ
+    res.status(200).json({ message: 'Processing message' });
+
+    // Обрабатываем команды асинхронно
+    try {
+      if (text.startsWith('/start')) {
+        await handleStart(message);
+      } else if (text.startsWith('/price')) {
+        const match = text.match(/\/price(?:\s+(.+))?/);
+        await handlePrice(message, match);
+      } else if (text.startsWith('/top')) {
+        await handleTop(message);
+      } else if (text.startsWith('/blumtokens')) {
+        await handleBlumTokens(message);
+      } else if (text.startsWith('/help')) {
+        await handleHelp(message);
+      }
+      console.log('Message processed successfully');
+    } catch (error) {
+      console.error('Error processing command:', error);
+      // Пытаемся отправить сообщение об ошибке пользователю
+      try {
+        await bot.sendMessage(message.chat.id, '❌ Произошла ошибка при обработке команды. Пожалуйста, попробуйте позже.');
+      } catch (sendError) {
+        console.error('Error sending error message:', sendError);
+      }
+    }
   } catch (error) {
     console.error('Error processing webhook:', error);
     return res.status(500).json({ error: error.message });

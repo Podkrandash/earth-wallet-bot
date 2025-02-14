@@ -4,10 +4,6 @@ const { getPrice, getTopCryptos } = require('../src/services/bybit');
 // Инициализация бота
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
 
-// Установка вебхука
-const url = `https://${process.env.VERCEL_URL}`;
-bot.setWebHook(`${url}/api/webhook`);
-
 // Получаем список токенов Blum
 const BLUM_TOKENS = process.env.BLUM_TOKENS ? process.env.BLUM_TOKENS.split(',') : [];
 
@@ -89,31 +85,37 @@ async function handleHelp(msg) {
 
 // Обработчик вебхука
 module.exports = async (req, res) => {
-  if (req.method === 'POST') {
-    const { message } = req.body;
-    
-    if (!message) {
-      return res.status(200).json({ message: 'No message in request' });
+  try {
+    if (req.method === 'POST') {
+      const { message } = req.body;
+      
+      if (!message) {
+        return res.status(200).json({ message: 'No message in request' });
+      }
+
+      const text = message.text || '';
+      console.log('Received message:', text);
+
+      // Обработка команд
+      if (text.startsWith('/start')) {
+        await handleStart(message);
+      } else if (text.startsWith('/price')) {
+        const match = text.match(/\/price(?:\s+(.+))?/);
+        await handlePrice(message, match);
+      } else if (text.startsWith('/top')) {
+        await handleTop(message);
+      } else if (text.startsWith('/blumtokens')) {
+        await handleBlumTokens(message);
+      } else if (text.startsWith('/help')) {
+        await handleHelp(message);
+      }
+
+      return res.status(200).json({ message: 'Success' });
     }
 
-    const text = message.text || '';
-
-    // Обработка команд
-    if (text.startsWith('/start')) {
-      await handleStart(message);
-    } else if (text.startsWith('/price')) {
-      const match = text.match(/\/price(?:\s+(.+))?/);
-      await handlePrice(message, match);
-    } else if (text.startsWith('/top')) {
-      await handleTop(message);
-    } else if (text.startsWith('/blumtokens')) {
-      await handleBlumTokens(message);
-    } else if (text.startsWith('/help')) {
-      await handleHelp(message);
-    }
-
-    return res.status(200).json({ message: 'Success' });
+    return res.status(200).json({ message: 'Only POST requests are accepted' });
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    return res.status(500).json({ error: error.message });
   }
-
-  return res.status(200).json({ message: 'Only POST requests are accepted' });
 }; 

@@ -1,19 +1,29 @@
 {
   "name": "earth-wallet-bot",
   "version": "1.0.0",
-  "description": "Telegram bot for crypto trading via Bybit",
+  "description": "Telegram bot for cryptocurrency wallet management",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
   "dependencies": {
+    "@ton/crypto": "^3.3.0",
+    "@ton/ton": "^13.11.2",
+    "bybit-api": "^3.10.33",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "node-cache": "^5.1.2",
     "node-telegram-bot-api": "^0.64.0",
-    "dotenv": "^16.3.1",
-    "axios": "^1.6.2",
-    "express": "^4.18.2",
-    "bybit-api": "^3.9.7",
-    "node-cache": "^5.1.2"
+    "otplib": "^12.0.1",
+    "qrcode": "^1.5.4",
+    "sequelize": "^6.37.5",
+    "sqlite3": "^5.1.7",
+    "ton": "^13.9.0",
+    "ton-crypto": "^3.2.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
@@ -21,4 +31,4 @@
   "engines": {
     "node": ">=18.0.0"
   }
-} 
+}

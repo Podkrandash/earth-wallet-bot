@@ -9,4 +9,5 @@ yarn-error.log*
 .vscode/
 .idea/
 *.sqlite
-.DS_Store 
+.DS_Store
+*.rar 
